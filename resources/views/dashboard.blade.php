@@ -33,7 +33,7 @@
             <div class="empty"><strong>Aún no hay movimientos</strong>Registra una recepción para comenzar a controlar el stock.</div>
         @else
             <div class="card-body"><ol class="timeline">
-                @foreach($recentMovements as $movement)<li><a class="table-link" href="{{ route('movements.show', $movement) }}">{{ config('inventory.movement_types.'.$movement->type) }} · {{ $movement->item->name }}</a><div class="muted small-text">{{ $movement->quantity }} {{ $movement->item->unit }} · {{ $movement->fromLocation?->name ?? 'Exterior' }} → {{ $movement->toLocation?->name ?? 'Entrega' }}</div><time>{{ $movement->created_at->diffForHumans() }} · {{ $movement->performed_by_email }}</time></li>@endforeach
+                @foreach($recentMovements as $movement)<li><a class="table-link" href="{{ route('movements.show', $movement) }}">{{ config('inventory.movement_types.'.$movement->type) }} · {{ $movement->item->name }}</a><div class="muted small-text">{{ $movement->quantity }} · {{ $movement->fromLocation?->name ?? 'Exterior' }} → {{ $movement->toLocation?->name ?? 'Entrega' }}</div><time>{{ $movement->created_at->diffForHumans() }} · {{ $movement->performed_by_email }}</time></li>@endforeach
             </ol></div>
         @endif
     </section>

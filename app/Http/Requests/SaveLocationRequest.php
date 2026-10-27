@@ -28,9 +28,10 @@ class SaveLocationRequest extends FormRequest
             'code' => ['required', 'string', 'max:50', Rule::unique('locations', 'code')->ignore($this->route('location'))],
             'type' => ['required', Rule::in(['site', 'building', 'floor', 'office', 'warehouse', 'zone'])],
             'address' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitude'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitude'],
+            'maps_url' => ['nullable', 'url:http,https', 'max:1000'],
             'notes' => ['nullable', 'string', 'max:2000'],
-            'map_x' => ['nullable', 'integer', 'between:0,100'],
-            'map_y' => ['nullable', 'integer', 'between:0,100'],
             'active' => ['sometimes', 'boolean'],
         ];
     }

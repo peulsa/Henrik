@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Database\Factories\StockMovementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class StockMovement extends Model
 {
     /** @use HasFactory<StockMovementFactory> */
-    use HasFactory;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'item_id', 'asset_id', 'from_location_id', 'to_location_id', 'type', 'quantity',

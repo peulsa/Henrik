@@ -24,13 +24,12 @@ class SaveItemRequest extends FormRequest
     {
         return [
             'sku' => ['required', 'string', 'max:80', Rule::unique('items', 'sku')->ignore($this->route('item'))],
+            'location_id' => ['required', Rule::exists('locations', 'id')->where('active', true)],
             'name' => ['required', 'string', 'max:150'],
             'category' => ['required', 'string', 'max:100'],
-            'type' => ['required', Rule::in(['supply', 'spare_part', 'equipment'])],
-            'tracking_type' => ['required', Rule::in(['bulk', 'serialized'])],
+            'type' => ['required', Rule::exists('item_types', 'slug')->where('active', true)],
             'brand' => ['nullable', 'string', 'max:100'],
             'model' => ['nullable', 'string', 'max:100'],
-            'unit' => ['required', 'string', 'max:40'],
             'default_min_stock' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string', 'max:2000'],
             'active' => ['sometimes', 'boolean'],

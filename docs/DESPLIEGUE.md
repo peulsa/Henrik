@@ -1,5 +1,7 @@
 # Despliegue
 
+Los navegadores cliente necesitan acceso a `unpkg.com` y `tile.openstreetmap.org` para cargar el mapa interactivo.
+
 ## Variables necesarias
 
 ```dotenv

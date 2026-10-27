@@ -11,6 +11,16 @@ use Illuminate\View\View;
 
 class AssetController extends Controller
 {
+    public function create(): View
+    {
+        return view('assets.create', [
+            'items' => Item::query()->where('active', true)->orderBy('name')->get(),
+            'locations' => Location::query()->where('active', true)->orderBy('name')->get(),
+            'selectedItem' => request()->integer('item_id') ?: null,
+            'selectedLocation' => request()->integer('location_id') ?: null,
+        ]);
+    }
+
     public function store(SaveAssetRequest $request): RedirectResponse
     {
         $asset = Asset::query()->create($request->validated());
@@ -29,7 +39,7 @@ class AssetController extends Controller
     {
         return view('assets.edit', [
             'asset' => $asset,
-            'items' => Item::query()->where('tracking_type', 'serialized')->orderBy('name')->get(),
+            'items' => Item::query()->where('active', true)->orderBy('name')->get(),
             'locations' => Location::query()->where('active', true)->orderBy('name')->get(),
         ]);
     }

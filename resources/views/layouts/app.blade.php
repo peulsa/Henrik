@@ -6,10 +6,13 @@
     <meta name="color-scheme" content="light dark">
     <title>@yield('title', 'Henrik') · Inventario TI</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @stack('styles')
     <script>document.documentElement.dataset.theme = localStorage.getItem('henrik-theme') || 'light';</script>
 </head>
 <body>
-    @php($platformUser = \App\Support\PlatformContext::user())
+    @php
+        $platformUser = \App\Support\PlatformContext::user();
+    @endphp
     <div class="shell">
         <aside class="sidebar" id="sidebar">
             <a class="brand" href="{{ route('dashboard') }}">
@@ -19,8 +22,9 @@
             <nav class="nav" aria-label="Principal">
                 <a class="{{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span>⌂</span> Resumen</a>
                 <a class="{{ request()->routeIs('items.*') ? 'active' : '' }}" href="{{ route('items.index') }}"><span>□</span> Inventario</a>
+                <a class="{{ request()->routeIs('item-types.*') ? 'active' : '' }}" href="{{ route('item-types.index') }}"><span>◇</span> Tipos</a>
                 <a class="{{ request()->routeIs('locations.*') ? 'active' : '' }}" href="{{ route('locations.index') }}"><span>⌖</span> Ubicaciones</a>
-                <a class="{{ request()->routeIs('movements.*') ? 'active' : '' }}" href="{{ route('movements.index') }}"><span>⇄</span> Movimientos</a>
+                <a class="{{ request()->routeIs('movements.*') || request()->routeIs('stock.*') ? 'active' : '' }}" href="{{ route('movements.index') }}"><span>⇄</span> Movimientos</a>
                 <a class="{{ request()->routeIs('audit.*') ? 'active' : '' }}" href="{{ route('audit.index') }}"><span>◷</span> Auditoría</a>
             </nav>
             <div class="sidebar-footer">
@@ -37,6 +41,18 @@
             </header>
 
             <div class="content">
+                @php
+                    $section = match (true) {
+                        request()->routeIs('items.*') => ['Inventario', route('items.index')],
+                        request()->routeIs('item-types.*') => ['Tipos', route('item-types.index')],
+                        request()->routeIs('locations.*') => ['Ubicaciones', route('locations.index')],
+                        request()->routeIs('stock.*') => ['Recepción de stock', route('stock.receive.create')],
+                        request()->routeIs('movements.*') => ['Movimientos', route('movements.index')],
+                        request()->routeIs('audit.*') => ['Auditoría', route('audit.index')],
+                        default => ['Resumen', route('dashboard')],
+                    };
+                @endphp
+                <nav class="breadcrumbs" aria-label="Ruta actual"><a href="{{ route('dashboard') }}">Inicio</a><span>›</span><a href="{{ $section[1] }}">{{ $section[0] }}</a>@hasSection('breadcrumb')<span>›</span><strong>@yield('breadcrumb')</strong>@endif</nav>
                 @if(session('success'))
                     <div class="alert success">{{ session('success') }}</div>
                 @endif
@@ -51,5 +67,6 @@
         </main>
     </div>
     <script src="{{ asset('js/app.js') }}" defer></script>
+    @stack('scripts')
 </body>
 </html>

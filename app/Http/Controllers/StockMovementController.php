@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\QuickStoreItemRequest;
 use App\Http\Requests\StoreStockMovementRequest;
+use App\Http\Requests\UpdateReceiptRequest;
 use App\Models\Item;
+use App\Models\ItemType;
 use App\Models\Location;
+use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +17,31 @@ use Illuminate\View\View;
 
 class StockMovementController extends Controller
 {
+    public function receive(Request $request): View
+    {
+        return view('stock.receive', [
+            'items' => Item::query()->where('active', true)->orderBy('name')->get(),
+            'locations' => Location::query()->where('active', true)->orderBy('name')->get(),
+            'types' => ItemType::query()->where('active', true)->orderBy('name')->get(),
+            'selectedItem' => $request->integer('item_id') ?: null,
+        ]);
+    }
+
+    public function quickStoreItem(QuickStoreItemRequest $request): RedirectResponse
+    {
+        $item = Item::query()->create([
+            ...$request->validated(),
+            'unit' => 'unidad',
+            'tracking_type' => 'serialized',
+            'default_min_stock' => 0,
+            'active' => true,
+        ]);
+        Stock::query()->create(['item_id' => $item->id, 'location_id' => $item->location_id, 'quantity' => 0]);
+
+        return redirect()->route('stock.receive.create', ['item_id' => $item->id])
+            ->with('success', 'Artículo creado. Ahora registra la cantidad recibida.');
+    }
+
     public function index(Request $request): View
     {
         $movements = StockMovement::query()
@@ -48,5 +77,32 @@ class StockMovementController extends Controller
     public function show(StockMovement $movement): View
     {
         return view('movements.show', ['movement' => $movement->load(['item', 'asset', 'fromLocation', 'toLocation'])]);
+    }
+
+    public function edit(StockMovement $movement): View
+    {
+        abort_unless($movement->type === 'receive', 404);
+
+        return view('stock.edit-receipt', [
+            'movement' => $movement,
+            'items' => Item::query()->where('active', true)->orderBy('name')->get(),
+            'locations' => Location::query()->where('active', true)->orderBy('name')->get(),
+        ]);
+    }
+
+    public function update(UpdateReceiptRequest $request, StockMovement $movement, InventoryService $inventory): RedirectResponse
+    {
+        abort_unless($movement->type === 'receive', 404);
+        $inventory->updateReceipt($movement, $request->validated());
+
+        return redirect()->route('movements.show', $movement)->with('success', 'Recepción actualizada correctamente.');
+    }
+
+    public function destroy(StockMovement $movement, InventoryService $inventory): RedirectResponse
+    {
+        abort_unless($movement->type === 'receive', 404);
+        $inventory->deleteReceipt($movement);
+
+        return redirect()->route('movements.index')->with('success', 'Recepción eliminada y stock corregido.');
     }
 }

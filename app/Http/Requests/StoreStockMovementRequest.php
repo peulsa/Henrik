@@ -31,7 +31,6 @@ class StoreStockMovementRequest extends FormRequest
             'quantity' => ['required', 'integer', 'min:1'],
             'from_location_id' => ['nullable', 'required_if:type,deliver,transfer,install,remove,adjust_out', 'exists:locations,id'],
             'to_location_id' => ['nullable', 'required_if:type,receive,transfer,install,remove,adjust_in', 'exists:locations,id', 'different:from_location_id'],
-            'reference' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }

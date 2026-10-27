@@ -16,12 +16,13 @@ flowchart LR
 
 | Entidad | Responsabilidad |
 |---|---|
-| `items` | Catálogo y forma de seguimiento. |
+| `item_types` | Tipos configurables del catálogo. |
+| `items` | Catálogo de artículos y su ubicación principal asignada. |
 | `service_areas` | Áreas para las que puede servir un artículo. |
 | `locations` | Árbol de sedes, edificios, oficinas, bodegas y zonas. |
 | `stocks` | Cantidad de un artículo en una ubicación. |
 | `assets` | Unidad identificable por etiqueta o número de serie. |
-| `stock_movements` | Registro inmutable de entradas, salidas y traslados. |
+| `stock_movements` | Registro de entradas, salidas y traslados; las recepciones admiten correcciones auditadas. |
 | `audit_logs` | Antes/después y responsable de los cambios. |
 
 ## Modularidad

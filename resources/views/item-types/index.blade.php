@@ -1,0 +1,9 @@
+@extends('layouts.app')
+@section('title', 'Tipos de inventario')
+@section('content')
+<div class="page-head"><div><span class="eyebrow">Configuración</span><h1>Tipos de inventario</h1><p>Crea, modifica o elimina las clases usadas para organizar el catálogo.</p></div></div>
+<div class="grid-2">
+<section class="card card-body"><h2>Nuevo tipo</h2><form method="post" action="{{ route('item-types.store') }}">@csrf<div class="form-grid"><div class="field"><label for="name">Nombre</label><input id="name" name="name" required value="{{ old('name') }}" placeholder="Ej. Impresora"></div><div class="field"><label for="slug">Código</label><input id="slug" name="slug" value="{{ old('slug') }}" placeholder="Se genera automáticamente"></div><div class="field full"><label for="description">Descripción</label><textarea id="description" name="description">{{ old('description') }}</textarea></div></div><div class="form-actions"><button class="button primary" type="submit">Crear tipo</button></div></form></section>
+<section class="card"><header class="card-header"><h2>Tipos disponibles</h2><span class="badge neutral">{{ $types->count() }}</span></header>@if($types->isEmpty())<div class="empty">No hay tipos registrados.</div>@else<div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Artículos</th><th>Acciones</th></tr></thead><tbody>@foreach($types as $type)<tr><td><strong>{{ $type->name }}</strong><div class="muted small-text mono">{{ $type->slug }}</div></td><td>{{ $type->items_count }}</td><td><div class="actions"><a class="button small secondary" href="{{ route('item-types.edit', $type) }}">Editar</a><form method="post" action="{{ route('item-types.destroy', $type) }}" onsubmit="return confirm('¿Eliminar este tipo?')">@csrf @method('delete')<button class="button small danger" type="submit">Eliminar</button></form></div></td></tr>@endforeach</tbody></table></div>@endif</section>
+</div>
+@endsection

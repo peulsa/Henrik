@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Asset;
 use App\Models\AuditLog;
 use App\Models\Item;
+use App\Models\ItemType;
 use App\Models\Location;
 use App\Models\Stock;
 use App\Models\StockMovement;
@@ -18,8 +19,9 @@ class InventoryWorkflowTest extends TestCase
     public function test_item_creation_creates_zero_stock_and_actor_audit(): void
     {
         $mainLocation = $this->mainLocation();
+        ItemType::factory()->create(['name' => 'Insumo', 'slug' => 'supply']);
 
-        $this->post('/items', $this->itemPayload())
+        $this->post('/items', [...$this->itemPayload(), 'location_id' => $mainLocation->id])
             ->assertRedirect();
 
         $item = Item::query()->where('sku', 'TON-001')->firstOrFail();
@@ -55,6 +57,68 @@ class InventoryWorkflowTest extends TestCase
             'quantity' => 12,
             'performed_by_email' => 'informatica@donihue.cl',
         ]);
+    }
+
+    public function test_receipt_can_be_edited_and_deleted_with_stock_correction(): void
+    {
+        $location = $this->mainLocation();
+        $item = $this->createItem(['location_id' => $location->id]);
+
+        $this->post('/movements', [
+            'item_id' => $item->id,
+            'type' => 'receive',
+            'quantity' => 8,
+            'to_location_id' => $location->id,
+            'notes' => 'Proveedor inicial',
+        ])->assertRedirect();
+
+        $movement = StockMovement::query()->firstOrFail();
+        $this->put('/movements/'.$movement->id, [
+            'item_id' => $item->id,
+            'quantity' => 5,
+            'to_location_id' => $location->id,
+            'notes' => 'Proveedor corregido',
+        ])->assertRedirect();
+        $this->assertSame(5, Stock::query()->whereBelongsTo($item)->firstOrFail()->quantity);
+
+        $this->delete('/movements/'.$movement->id)->assertRedirect('/movements');
+        $this->assertSame(0, Stock::query()->whereBelongsTo($item)->firstOrFail()->quantity);
+        $this->assertDatabaseMissing('stock_movements', ['id' => $movement->id]);
+    }
+
+    public function test_quick_item_creation_from_reception_assigns_location(): void
+    {
+        $location = $this->mainLocation();
+        $type = ItemType::factory()->create(['slug' => 'peripheral']);
+
+        $this->post('/stock/quick-item', [
+            'sku' => 'MOU-001',
+            'name' => 'Mouse USB',
+            'category' => 'Periféricos',
+            'type' => $type->slug,
+            'location_id' => $location->id,
+        ])->assertRedirect();
+
+        $item = Item::query()->where('sku', 'MOU-001')->firstOrFail();
+        $this->assertSame($location->id, $item->location_id);
+        $this->get('/locations/'.$location->id.'/inventory')->assertSee('Mouse USB')->assertSee('Editar')->assertSee('Eliminar');
+    }
+
+    public function test_audit_explains_changes_in_plain_language(): void
+    {
+        $location = $this->mainLocation();
+        $item = $this->createItem(['location_id' => $location->id]);
+        $item->update(['name' => 'Tóner actualizado']);
+        $stock = Stock::factory()->create(['item_id' => $item->id, 'location_id' => $location->id, 'quantity' => 0]);
+        $stock->update(['quantity' => 10]);
+
+        $this->get('/audit')
+            ->assertOk()
+            ->assertSee('Detalle comprensible')
+            ->assertSee('Cambió nombre')
+            ->assertSee('stock de')
+            ->assertSee('Cambió cantidad de “0” a “10”')
+            ->assertDontSee('auditable_type');
     }
 
     public function test_delivery_without_enough_stock_is_rejected_without_partial_changes(): void
@@ -113,7 +177,7 @@ class InventoryWorkflowTest extends TestCase
         $this->assertTrue(AuditLog::query()->where('auditable_id', $item->id)->where('action', 'deleted')->exists());
     }
 
-    public function test_serialized_asset_cannot_be_created_for_bulk_item(): void
+    public function test_device_can_be_identified_from_any_catalog_item(): void
     {
         $item = $this->createItem(['tracking_type' => 'bulk']);
 
@@ -121,7 +185,9 @@ class InventoryWorkflowTest extends TestCase
             'item_id' => $item->id,
             'asset_tag' => 'MDO-001',
             'status' => 'in_stock',
-        ])->assertSessionHasErrors('item_id');
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('assets', ['item_id' => $item->id, 'asset_tag' => 'MDO-001']);
     }
 
     public function test_install_moves_a_serialized_asset_to_its_destination(): void

@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title', 'Editar tipo')
+@section('content')
+<div class="page-head"><div><span class="eyebrow">Tipos de inventario</span><h1>Editar {{ $itemType->name }}</h1><p>Los artículos asociados conservarán el tipo si modificas su código.</p></div></div>
+<form class="card card-body" method="post" action="{{ route('item-types.update', $itemType) }}">@csrf @method('put')<div class="form-grid"><div class="field"><label for="name">Nombre</label><input id="name" name="name" required value="{{ old('name', $itemType->name) }}"></div><div class="field"><label for="slug">Código</label><input id="slug" name="slug" required value="{{ old('slug', $itemType->slug) }}"></div><div class="field full"><label for="description">Descripción</label><textarea id="description" name="description">{{ old('description', $itemType->description) }}</textarea></div><div class="field full"><label class="check"><input type="hidden" name="active" value="0"><input type="checkbox" name="active" value="1" @checked(old('active', $itemType->active))> Tipo activo</label></div></div><div class="form-actions"><a class="button secondary" href="{{ route('item-types.index') }}">Cancelar</a><button class="button primary" type="submit">Guardar cambios</button></div></form>
+@endsection

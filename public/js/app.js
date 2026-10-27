@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (movementType) {
         const updateFields = () => {
             const type = movementType.value;
-            const needsFrom = ['deliver', 'transfer', 'install', 'adjust_out'].includes(type);
-            const needsTo = ['receive', 'transfer', 'remove', 'adjust_in'].includes(type);
+            const needsFrom = ['deliver', 'transfer', 'install', 'remove', 'adjust_out'].includes(type);
+            const needsTo = ['receive', 'transfer', 'install', 'remove', 'adjust_in'].includes(type);
             document.querySelector('[data-from-field]')?.classList.toggle('field-muted', !needsFrom);
             document.querySelector('[data-to-field]')?.classList.toggle('field-muted', !needsTo);
         };

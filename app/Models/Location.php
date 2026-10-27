@@ -16,12 +16,17 @@ class Location extends Model
     use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'parent_id', 'name', 'code', 'type', 'address', 'notes', 'map_x', 'map_y', 'active',
+        'parent_id', 'name', 'code', 'type', 'address', 'latitude', 'longitude', 'maps_url',
+        'notes', 'map_x', 'map_y', 'active',
     ];
 
     protected function casts(): array
     {
-        return ['active' => 'boolean'];
+        return [
+            'active' => 'boolean',
+            'latitude' => 'decimal:7',
+            'longitude' => 'decimal:7',
+        ];
     }
 
     public function parent(): BelongsTo
@@ -37,6 +42,11 @@ class Location extends Model
     public function stocks(): HasMany
     {
         return $this->hasMany(Stock::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(Item::class);
     }
 
     public function assets(): HasMany

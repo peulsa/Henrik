@@ -1,15 +1,6 @@
 <?php
 
 return [
-    'item_types' => [
-        'supply' => 'Insumo',
-        'spare_part' => 'Repuesto',
-        'equipment' => 'Equipo',
-    ],
-    'tracking_types' => [
-        'bulk' => 'Por cantidad',
-        'serialized' => 'Por serie / etiqueta',
-    ],
     'location_types' => [
         'site' => 'Sede',
         'building' => 'Edificio',

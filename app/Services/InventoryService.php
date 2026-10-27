@@ -43,6 +43,34 @@ class InventoryService
         });
     }
 
+    public function updateReceipt(StockMovement $movement, array $data): StockMovement
+    {
+        return DB::transaction(function () use ($movement, $data): StockMovement {
+            $movement->refresh();
+            $this->decrease($movement->item_id, $movement->to_location_id, $movement->quantity);
+            $this->increase((int) $data['item_id'], (int) $data['to_location_id'], (int) $data['quantity']);
+            $actor = PlatformContext::user();
+            $movement->update([
+                ...$data,
+                'reference' => null,
+                'performed_by_email' => $actor->email,
+                'performed_by_name' => $actor->name,
+                'performed_by_external_id' => $actor->externalId,
+            ]);
+
+            return $movement;
+        });
+    }
+
+    public function deleteReceipt(StockMovement $movement): void
+    {
+        DB::transaction(function () use ($movement): void {
+            $movement->refresh();
+            $this->decrease($movement->item_id, $movement->to_location_id, $movement->quantity);
+            $movement->delete();
+        });
+    }
+
     private function increase(int $itemId, int $locationId, int $quantity): void
     {
         $stock = Stock::query()->firstOrCreate(

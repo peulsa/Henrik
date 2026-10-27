@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Item;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
 class SaveAssetRequest extends FormRequest
 {
@@ -33,19 +31,6 @@ class SaveAssetRequest extends FormRequest
             'assigned_to_email' => ['nullable', 'email', 'max:255'],
             'acquired_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:2000'],
-        ];
-    }
-
-    public function after(): array
-    {
-        return [
-            function (Validator $validator): void {
-                $item = Item::query()->find($this->integer('item_id'));
-
-                if ($item && $item->tracking_type !== 'serialized') {
-                    $validator->errors()->add('item_id', 'Solo se pueden identificar artículos con seguimiento por serie.');
-                }
-            },
         ];
     }
 }
