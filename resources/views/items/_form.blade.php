@@ -1,0 +1,16 @@
+@php($editing = isset($item))
+<div class="form-grid">
+    <div class="field"><label for="sku">Código / SKU</label><input id="sku" name="sku" required maxlength="80" value="{{ old('sku', $item->sku ?? '') }}" placeholder="Ej. TON-HP-206A"></div>
+    <div class="field"><label for="name">Nombre</label><input id="name" name="name" required maxlength="150" value="{{ old('name', $item->name ?? '') }}" placeholder="Nombre descriptivo"></div>
+    <div class="field"><label for="category">Categoría</label><input id="category" name="category" required maxlength="100" value="{{ old('category', $item->category ?? '') }}" placeholder="Ej. Impresión, periféricos"></div>
+    <div class="field"><label for="type">Tipo</label><select id="type" name="type" required>@foreach(config('inventory.item_types') as $value => $label)<option value="{{ $value }}" @selected(old('type', $item->type ?? 'supply') === $value)>{{ $label }}</option>@endforeach</select></div>
+    <div class="field"><label for="tracking_type">Seguimiento</label><select id="tracking_type" name="tracking_type" required>@foreach(config('inventory.tracking_types') as $value => $label)<option value="{{ $value }}" @selected(old('tracking_type', $item->tracking_type ?? 'bulk') === $value)>{{ $label }}</option>@endforeach</select><small>Usa seguimiento por serie para pantallas, impresoras y otros equipos individuales.</small></div>
+    <div class="field"><label for="unit">Unidad de medida</label><input id="unit" name="unit" required maxlength="40" value="{{ old('unit', $item->unit ?? 'unidad') }}"></div>
+    <div class="field"><label for="brand">Marca</label><input id="brand" name="brand" maxlength="100" value="{{ old('brand', $item->brand ?? '') }}"></div>
+    <div class="field"><label for="model">Modelo</label><input id="model" name="model" maxlength="100" value="{{ old('model', $item->model ?? '') }}"></div>
+    <div class="field"><label for="default_min_stock">Stock mínimo</label><input id="default_min_stock" name="default_min_stock" type="number" min="0" required value="{{ old('default_min_stock', $item->default_min_stock ?? 0) }}"><small>Se usa para generar alertas en cada ubicación.</small></div>
+    <div class="field"><label>Áreas a las que puede servir</label><div class="check-grid">@foreach($areas as $area)<label class="check"><input type="checkbox" name="service_area_ids[]" value="{{ $area->id }}" @checked(in_array($area->id, old('service_area_ids', $editing ? $item->serviceAreas->pluck('id')->all() : [])))>{{ $area->name }}</label>@endforeach</div></div>
+    <div class="field full"><label for="description">Descripción y compatibilidad</label><textarea id="description" name="description" maxlength="2000" placeholder="Modelos compatibles, características u observaciones">{{ old('description', $item->description ?? '') }}</textarea></div>
+    @if($editing)<div class="field full"><label class="check"><input type="hidden" name="active" value="0"><input type="checkbox" name="active" value="1" @checked(old('active', $item->active))> Artículo activo</label></div>@endif
+</div>
+<div class="form-actions"><a class="button secondary" href="{{ $editing ? route('items.show', $item) : route('items.index') }}">Cancelar</a><button class="button primary" type="submit">{{ $editing ? 'Guardar cambios' : 'Crear artículo' }}</button></div>
