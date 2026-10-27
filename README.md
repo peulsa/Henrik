@@ -26,6 +26,7 @@ La gestión de permisos permanece en la plataforma principal. Henrik valida la i
 
 - PHP 8.3 o superior.
 - Composer 2.
+- Laravel 13.
 - SQLite para desarrollo; MySQL o PostgreSQL recomendado en producción.
 - Extensiones PHP habituales de Laravel: PDO, Mbstring, OpenSSL, Tokenizer, XML y Ctype.
 
@@ -34,12 +35,11 @@ La gestión de permisos permanece en la plataforma principal. Henrik valida la i
 ```bash
 composer install
 cp .env.example .env
+touch database/database.sqlite
 php artisan key:generate
-php artisan migrate --seed
-php artisan serve
 ```
 
-Para trabajar localmente, configura en `.env`:
+Antes de iniciar, abre `.env` y configura la identidad local:
 
 ```dotenv
 HENRIK_ALLOW_LOCAL_IDENTITY=true
@@ -47,7 +47,25 @@ HENRIK_LOCAL_USER_EMAIL=tu-correo@donihue.cl
 HENRIK_LOCAL_USER_NAME="Tu nombre"
 ```
 
-Esta excepción solo funciona con `APP_ENV=local` o `testing`. En producción, Henrik exige la firma de la plataforma principal.
+Después ejecuta:
+
+```bash
+php artisan migrate --seed
+php artisan optimize:clear
+php artisan serve
+```
+
+Abre `http://127.0.0.1:8000`. Si el puerto está ocupado, usa `php artisan serve --port=8001` y abre `http://127.0.0.1:8001`.
+
+### Error Unauthorized en desarrollo
+
+Si aparece **Unauthorized**, revisa que `.env` tenga `APP_ENV=local` y `HENRIK_ALLOW_LOCAL_IDENTITY=true`. Después ejecuta:
+
+```bash
+php artisan optimize:clear
+```
+
+La identidad local solo funciona con `APP_ENV=local` o `testing`. En producción, Henrik exige la identidad firmada que entrega la plataforma principal.
 
 ## Pruebas y formato
 
@@ -62,9 +80,7 @@ La suite comprueba autenticación delegada, auditoría comprensible, asignación
 
 - [Alcance y requisitos](docs/REQUISITOS.md)
 - [Arquitectura y modelo](docs/ARQUITECTURA.md)
-- [Integración con la plataforma](docs/INTEGRACION.md)
 - [Despliegue](docs/DESPLIEGUE.md)
-- [Registro de versiones](CHANGELOG.md)
 
 ## Versionado
 

@@ -36,6 +36,5 @@ flowchart LR
 ## Versionado
 
 - Git conserva las versiones del código.
-- `CHANGELOG.md` documenta cambios funcionales.
 - `audit_logs` conserva versiones operativas de los datos.
 - Las futuras integraciones HTTP usarán una ruta versionada, comenzando en `/api/v1`.
